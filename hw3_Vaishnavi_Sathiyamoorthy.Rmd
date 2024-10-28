@@ -1,0 +1,393 @@
+---
+title: "Homework 3"
+author: "Vaishnavi Sathiyamoorthy"
+date: "2024-09-27"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Question 1. Sampling distribution for a sample proportion
+
+### Question 1a.
+If we use a sample proportion, p, based on a sample of size n = 24, to estimate the population proportion, π = 0.425, would it be very surprising to get an estimate that is off by more than 0.05? Support your answer by providing the probability of getting an estimate that differs by more than 0.05.
+
+#### Solution
+```{r}
+set.seed(123)
+pi <- 0.425
+n <- 24
+margin <- 0.05
+SE <- sqrt(pi * (1 - pi) / n)
+lower_bound <- pi - margin
+upper_bound <- pi + margin
+
+z_lower <- (lower_bound - pi) / SE
+z_upper <- (upper_bound - pi) / SE
+prob_within_bounds <- pnorm(z_upper) - pnorm(z_lower)
+1 - prob_within_bounds
+```
+
+The probability of getting an estimate that differs by more than 0.05 is 0.62.
+
+### Question 1b.
+If we use a sample proportion, p, based on a sample of size n = 240, to estimate the population proportion, π = 0.425, would it be very surprising to get an estimate that is off by more than 0.05? Support your answer by providing the probability of getting an estimate that differs by more than 0.05.
+
+#### Solution
+```{r}
+pi <- 0.425
+n <- 240
+margin <- 0.05
+SE <- sqrt(pi * (1 - pi) / n)
+lower_bound <- pi - margin
+upper_bound <- pi + margin
+
+z_lower <- (lower_bound - pi) / SE
+z_upper <- (upper_bound - pi) / SE
+prob_within_bounds <- pnorm(z_upper) - pnorm(z_lower)
+1 - prob_within_bounds
+```
+
+The probability of getting an estimate that differs by more than 0.05 is 0.12.
+
+### Question 1c.
+If we use a sample proportion, p, based on a sample of size n = 2400, to estimate the population proportion, π = 0.425, would it be very surprising to get an estimate that is off by more than 0.05? Support your answer by providing the probability of getting an estimate that differs by more than 0.05.
+
+#### Solution
+```{r}
+pi <- 0.425
+n <- 2400
+margin <- 0.05
+SE <- sqrt(pi * (1 - pi) / n)
+lower_bound <- pi - margin
+upper_bound <- pi + margin
+
+z_lower <- (lower_bound - pi) / SE
+z_upper <- (upper_bound - pi) / SE
+prob_within_bounds <- pnorm(z_upper) - pnorm(z_lower)
+1 - prob_within_bounds
+```
+
+The probability of getting an estimate that differs by more than 0.05 is 7.23e-7.
+
+### Question 1d.
+What are the standard deviations for sampling distributions of p for the sample sizes of 25, 100, 250, and 500? (Note, these are called the standard errors of p.)
+
+#### Solution
+```{r}
+sqrt(pi * (1 - pi) / 25)
+sqrt(pi * (1 - pi) / 100)
+sqrt(pi * (1 - pi) / 250)
+sqrt(pi * (1 - pi) / 500)
+```
+
+The standard deviation for the sample size of 25 is 0.099. The standard deviation for the sample size of 100 is 0.049. The standard deviation for the sample size of 250 is 0.031. The standard deviation for the sample size of 500 is 0.022.
+
+### Question 1e.
+Using the information obtained in your answers above, explain the effect that sample size has on the accuracy of an estimate and why.
+
+#### Solution
+As sample size increases, the accuracy increases. As seen above the standard deviation decreases as sample size increases. This is because a larger sample makes it more representative of the population.
+
+## Question 2. Maximum likelihood estimation
+Suppose we obtain a random sample of adults between the ages of 18 and 59 and observe the number of individuals who were infected with HPV.
+
+### Question 2a.
+Draw the log-likelihood function for an estimate of the population parameter as a function of π with sample size n = 50 and with 20 individuals who were infected with HPV
+
+#### Solution
+```{r}
+library(ggplot2)
+loglik <- function(pi, n, observation) {
+  log(choose(n, observation)) + (observation * log(pi)) + (n - observation)*log(1 - pi)
+}
+
+pis <- seq(0.01, 0.99, by=0.01)
+ll_a <- sapply(pis, loglik, n = 50, observation = 20)
+data_a <- data.frame(pis,ll_a)
+
+ggplot(data_a, aes(x=pis, y=ll_a))+
+  geom_line(col="blue", lwd=1)+
+  labs(title="Log-likelihood Function for Population Parameter Estimate",
+       subtitle="n=50, observations=20", x=expression(paste(pi, " values")), y="Log-likelihood")
+```
+
+### Question 2b.
+Draw the likelihood function for an estimate of the population parameter as a function of π with sample size n = 50 and with 20 individuals who were infected with HPV
+
+#### Solution
+```{r}
+lik <- function(pi, n, observation){
+  (choose(n,observation)) * (pi^observation) * ((1-pi)^(n-observation))
+}
+
+pis <- seq(0.01, 0.99, by=0.01)
+ll_b <- sapply(pis, lik, n = 50, observation = 20)
+data_b <- data.frame(pis,ll_b)
+
+ggplot(data_b, aes(x=pis, y=ll_b))+
+  geom_line(col="purple", lwd=1)+
+  labs(title="Likelihood Function for Population Parameter Estimate",
+       subtitle="n=50, observations=20", x=expression(paste(pi, " values")), y="Likelihood")
+```
+
+### Question 2c.
+Draw the log-likelihood function for an estimate of the population parameter as a function of π with sample size n = 100 and with 40 individuals who were infected with HPV. Add the plot you generated in 2a.
+
+#### Solution
+```{r}
+pis <- seq(0.01, 0.99, by=0.01)
+ll_a <- sapply(pis, loglik, n = 50, observation = 20)
+ll_c <- sapply(pis, loglik, n = 100, observation = 40)
+
+data_c <- data.frame(pis,ll_a,ll_c)
+
+ggplot(data_c)+
+  geom_line(aes(x=pis, y=ll_c, color="n=100, observation=40"), lwd=1)+
+  geom_line(aes(x=pis, y=ll_a, color="n=50, observation=20"), lwd=1)+
+  labs(title="Log-likelihood Function for Population Parameter Estimate",
+       x=expression(paste(pi, " values")), y="Log-likelihood")+
+  scale_color_manual(name="Legend",
+                     values = c("n=50, observation=20"="blue", 
+                                "n=100, observation=40"="lightblue"))
+```
+
+### Question 2d.
+Draw the likelihood function for an estimate of the population parameter as a function of π with sample size n = 100 and with 40 individuals who were infected with HPV. Add the plot you generated in 2b.
+
+#### Solution
+```{r}
+pis <- seq(0.01, 0.99, by=0.01)
+ll_b <- sapply(pis, lik, n = 50, observation = 20)
+ll_d <- sapply(pis, lik, n = 100, observation = 40)
+
+data_d <- data.frame(pis,ll_b,ll_d)
+
+ggplot(data_d)+
+  geom_line(aes(x=pis, y=ll_b, color="n=50, observation=20"), lwd=1)+
+  geom_line(aes(x=pis, y=ll_d, color="n=100, observation=40"), lwd=1)+
+  labs(title="Likelihood Function for Population Parameter Estimate",
+       x=expression(paste(pi, " values")), y="Likelihood", color="legend")+
+  scale_color_manual(name="Legend",
+                     values = c("n=50, observation=20"="purple", 
+                                "n=100, observation=40"="pink"))
+```
+
+### Question 2e.
+How do the likelihood functions based on a sample size of 50 (with 20 individuals infected with HPV) and based on a sample size of 100 (with 40 individuals infected with HPV) compare? Describe similarities/differences.
+
+#### Solution
+The similarity between the log-likelihood and likelihood functions is that the lines and curves are parallel to each other. In other words, they do not intersect. The differences is that in the likelihood line for n = 50 is below n = 100. The curves are the opposite.
+
+### Question 2f.
+What are the maximum likelihood estimates of π for each of the two samples: (1) 20 infected with HPV out of 50, and (2) 40 infected with HPV out of 100.
+
+#### Solution
+```{r}
+20/50
+40/100
+```
+
+The maximum likelihood for x = 20 is 26 and x = 40 is 52.
+
+## Question 3. Confidence interval for a sample proportion
+Suppose we want a 95% confidence interval for the parts of this question and that we are taking a sample of size 100 from different populations. Each patient population has a different population proportion of a “success”, π. Recall that a “success” is just the outcome of interest.
+
+### Question 3a.
+What is the point estimate and 95% confidence interval for observing 15 successes out of sample size of 100 people?
+
+#### Solution
+```{r}
+binom.test(15, 100)
+```
+
+The point estimate is 0.15. The confidence interval is between 0.08 and 0.22.
+
+### Question 3b.
+What is the point estimate and 95% confidence interval for observing 85 successes out of sample size of 100 people?
+
+#### Solution
+```{r}
+binom.test(85, 100)
+```
+
+The point estimate is 0.85. The confidence interval is between 0.78 and 0.92.
+
+### Question 3c.
+What is the point estimate and 95% confidence interval for observing 30 successes out of sample size of 100 people?
+
+#### Solution
+```{r}
+binom.test(30, 100)
+```
+
+The point estimate is 0.3. The confidence interval is between 0.21 and 0.39.
+
+### Question 3d.
+What is the point estimate and 95% confidence interval for observing 70 successes out of sample size of 100 people?
+
+#### Solution
+```{r}
+binom.test(70, 100)
+```
+
+The point estimate is 0.7. The confidence interval is between 0.61 and 0.79.
+
+### Question 3e.
+What is the point estimate and 95% confidence interval for observing 50 successes out of sample size of 100 people?
+
+#### Solution
+```{r}
+binom.test(50, 100)
+```
+
+The point estimate is 0.5. The confidence interval is between 0.4 and 0.6.
+
+### Question 3f.
+Look at your answers to 3a to 3e. As the sample proportion approaches 0.5, what happens to the width of the confidence interval? Explain why this happens
+
+#### Solution
+The width of the interval increases as the sample proportion approaches 0.5. This happens because the sample error is larger.
+
+## Question 4. P-value for a sample proportion
+
+We want a p-value for testing whether the population proportion of success differs from an historical value of π = 0.75 for the parts of this question. Suppose we are sampling from a population where the true π value is 0.725. Answer the the questions below for obtaining a p-value for testing:
+
+H0 : π = 0.75
+Ha : π ≠ 0.75
+
+### Question 4a.
+Suppose you took a random sample of size 50 from the population where π = 0.725 and performed the test of significance (above). Do this 100 times. What fraction of samples had a p-value < 0.05?
+
+#### Solution
+```{r}
+set.seed(123)
+lst <- list()
+for (i in 1:100){
+  lst <- c(lst, binom.test(rbinom(1, 50, 0.725), 50, 0.75)[3])
+}
+sum(lst < 0.05) / 100
+```
+0.07 of the samples have a p-value < 0.05.
+
+### Question 4b.
+Suppose you took a random sample of size 500 from the population where π = 0.725 and performed the test of significance (above). Do this 100 times. What fraction of samples had a p-value < 0.05?
+
+#### Solution
+```{r}
+set.seed(123)
+lst <- list()
+for (i in 1:100){
+  lst <- c(lst, binom.test(rbinom(1, 500, 0.725), 500, 0.75)[3])
+}
+sum(lst < 0.05) / 100
+```
+0.25 of the samples have a p-value < 0.05.
+
+### Question 4c.
+Suppose you took a random sample of size 2500 from the population where π = 0.725 and performed the test of significance (above). Do this 100 times. What fraction of samples had a p-value < 0.05?
+
+#### Solution
+```{r}
+set.seed(123)
+lst <- list()
+for (i in 1:100){
+  lst <- c(lst, binom.test(rbinom(1, 2500, 0.725), 2500, 0.75)[3])
+}
+sum(lst < 0.05) / 100
+```
+0.86 of the samples have a p-value < 0.05.
+
+### Question 4d.
+Based on your answers to the parts above, what happens to chance of getting a statistically significant p-value (i.e. a p-value < 0.05) when performing a test of significance that the population proportion is equal to 0.75 when in reality it equals 0.725 as the sample size increases?
+
+#### Solution
+As the sample size increases, the proportion of statistically signficant samples increases. 
+
+### Question 4e.
+Explain why your observation in 4d occurs.
+
+#### Solution
+This is because the probability that the difference is purely by chance decreases as the sample size increases.
+
+## Question 5. Normal approximation to a binomial distribution
+This problem is based on this historical data: 1 out of 4 women that smoke will die from smoking related diseases. In other words, π = 0.25. Please use the approximation method discussed in class without considering continuity correction to answer the following questions.
+
+### Question 5a.
+What is the probability that out of a sample size of 1,000 women smokers we observe 0.26 or greater that die from smoking related diseases? Use a normal approximation to the binomial to estimate this quantity and compare it to the exact probability from a binomial.
+
+```{r}
+1 - pnorm(0.26, 0.25, sqrt((0.25 * 0.75) / 1000))
+```
+
+## Question 6. Data analysis: Breast cancer repoeration rate
+Hopevale Hospital wants to understand the quality of care for their breast cancer patients. In particular, the quality measurement in which they are most interested is the reoperation rate of women who undergo lumpectomy. The leadership is interested in how their lumpectomy reoperation rates in women who are newly diagnosed with breast cancer compares to their peer institutions. They know that the average reoperation rate for a set of their peer institutions is 15%. They would like you to analyze the data they provide on 600 breast cancer patients who underwent lumpectomy. The data are in a file called BreastCancerOutcomes24.csv
+
+• size: the size of the cancer in cm grouped by less than 2 cm or greater than or equal to 2 cm
+• procedure: indicates whether the lumpectomy procedure was cyroablation (kill the cancer cells by freezing) or resection (surgical removal)
+• reoperation: indicates whether the patient had to undergo a reoperation
+
+### Question 6a.
+What is the null hypothesis for a test of significance to determine whether the lumpectomy reoperation rate for Hopevale differs from that of their peer institutions?
+
+#### Solution
+H0: The reoperation rate at Hopevale = 0.15, which is the reoperation rate at peer institutions.
+
+### Question 6b.
+What is the alternative hypothesis for a test of significance to determine whether the lumpectomy reoperation rate for Hopevale differs from that of their peer institutions?
+
+#### Solution
+HA: The reoperation rate at Hopevale ≠ 0.15, which differs from the reoperation rate at peer institutions.
+
+### Question 6c.
+Report the p-value for the test of significance.
+
+#### Solution
+```{r}
+library(here)
+set.seed(123)
+df <- read.csv(here("BreastCancerOutcomes24.csv"))
+prop.test(sum(df$reoperation == "yes"), 600, 0.15)
+```
+The p-value is 0.0024. 
+
+### Question 6d.
+What is your conclusion? Answer by writing a few sentences. Make sure that if the test indicates the proportion differs from 0.15 you indicate how it differs.
+
+#### Solution
+We reject the null hypothesis, the reoperation rate at Hopevale is equivalent to its peers at 0.15, because the p-value is less than 0.05. There is evidence to suggest that the Hopevale reoperation rate is higher than it's peers.
+
+### Question 6e.
+Report the 99% confidence interval for the proportion of patients with tumors less than 2 cm who had a reoperation.
+
+#### Solution
+```{r}
+library(tidyverse)
+subset_rows <- df %>% filter(size == "less than 2")
+prop.test(sum(subset_rows$reoperation == "yes"), nrow(subset_rows), p = 0.15, conf.level = 0.99)
+```
+We are 99% confident that the true proportion of patients that had tumors less than 2cm who had an operation is between 0.076 and 0.175.
+
+### Question 6f.
+Report the 99% confidence interval for the proportion of patients with tumors greater than 2 cm who had a reoperation.
+
+#### Solution
+```{r}
+subset_rows <- df %>% filter(size == "2 or greater")
+prop.test(sum(subset_rows$reoperation == "yes"), nrow(subset_rows), p = 0.15, conf.level = 0.99)
+```
+We are 99% confident that the true proportion of patients that had tumors greater than 2cm who had an operation is between 0.21 and 0.35.
+
+### Question 6g.
+Compare the two confidence intervals in 6e and 6f. What do you conclude? (Write a couple of sentences.)
+
+#### Solution
+The confidence interval for the reoperation rate for patients with a tumor size less than 2cm included 0.15. However, the confidence interval for the reoperation rate for patients with a tumor size ≥ 2cm does not include 0.15. Therefore, the reoperation right is higher for tumors that are ≥ 2cm.
+
+### Question 6h.
+Based on your answers above, do you think the leadership of Hopevale Hospital should be alarmed with respect to their reoperation rates? Is there more information you think they should obtain before taking action? Respond with a few sentences.
+
+#### Solution
+The leadership of Hopevale Hospital should evaluate the reoperation rates for tumors that are < 2cm and ≥ 2cm at the peer hospitals. Based on the results from the analysis of other peer hospitals, Hopevale can take actions. If there is a significant difference, Hopevale should be alarmed at the reoperation rates.
